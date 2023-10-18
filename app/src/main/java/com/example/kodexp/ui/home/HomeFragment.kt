@@ -4,34 +4,41 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.kodexp.databinding.FragmentHomeBinding
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.kodexp.model.Pokemon
+import com.example.kodexp.ui.home.PokemonAdapter
+
 
 class HomeFragment : Fragment() {
-
     private var _binding: FragmentHomeBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
+    private val viewModel: HomeViewModel by lazy {
+        ViewModelProvider(this).get(HomeViewModel::class.java)
+    }
+
+    private val adapter by lazy { PokemonAdapter() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val homeViewModel =
-            ViewModelProvider(this).get(HomeViewModel::class.java)
-
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textHome
-        homeViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
+        val recyclerView: RecyclerView = binding.recyclerView
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.adapter = adapter
+
+        viewModel.pokemonList.observe(viewLifecycleOwner, { pokemonList: List<Pokemon> ->
+            adapter.updateData(pokemonList)
+        })
+
+
         return root
     }
 
