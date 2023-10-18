@@ -6,10 +6,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.kodexp.R
+import com.example.kodexp.model.Pokemon
 import com.example.kodexp.room.kodex.Kodex
 
 
-class CardAdapter(val cardItemList: List<Kodex>?): RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
+class CardAdapter(val cardItemList: List<Pokemon>): RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
 
     class CardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var textViewTitle: TextView
@@ -27,8 +28,8 @@ class CardAdapter(val cardItemList: List<Kodex>?): RecyclerView.Adapter<CardAdap
     }
 
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
-        val currentItem: Kodex = cardItemList!![position]
-        holder.textViewTitle.setText(currentItem.pokemon_id.toString())
+        val currentItem: Pokemon = cardItemList[position]
+        holder.textViewTitle.setText(currentItem.name.toString())
         holder.textViewDescription.setText(currentItem.owned.toString())
     }
 

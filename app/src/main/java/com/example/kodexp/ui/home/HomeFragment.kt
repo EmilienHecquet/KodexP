@@ -39,7 +39,7 @@ class HomeFragment : Fragment() {
 
         val listView: RecyclerView = binding.listPokemon
 
-        viewModel.pokemons.observe(viewLifecycleOwner) {
+        viewModel.pokemonList.observe(viewLifecycleOwner) {
             listView.adapter = CardAdapter(it)
         }
 

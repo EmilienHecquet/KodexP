@@ -61,18 +61,11 @@ class HomeViewModel(context: Context) : ViewModel() {
             KodexDatabase::class.java, "kodex-database"
         ).build()
 
+        // Use local data to get owned pokemons
+        getPokemonOwnedFromDB()
+
+        // Get pokemon from API (use local data update object pojemon with owned)
         fetchPokemonData()
-
-        viewModelScope.launch(Dispatchers.IO) {
-            //TODO : appel api
-            //todo: traitement
-
-            var result = db.kodexDao().getAll()
-            withContext(Dispatchers.Main) {
-                Log.d("TAG", "init: $result")
-                _pokemons.value = result
-            }
-        }
     }
 
     private fun fetchPokemonData() {
@@ -81,22 +74,34 @@ class HomeViewModel(context: Context) : ViewModel() {
                 val response = service.getPokemonList()
                 if (response.isSuccessful) {
                     val pokemonListResponse = response.body()
-                    val pokemonList = pokemonListResponse?.results?.map { pokemonListItem ->
-                        Pokemon(pokemonListItem.name, pokemonListItem.url)
+                    val pokemonList = pokemonListResponse?.results?.mapIndexed { index, pokemonListItem ->
+                        _pokemons.value!!.find{ it.pokemon_id == index }?.let {
+                            Pokemon(index, pokemonListItem.name, pokemonListItem.url, it.owned)
+                        } ?: Pokemon(index, pokemonListItem.name, pokemonListItem.url)
                     } ?: emptyList()
 
                     _pokemonList.value = pokemonList
 
                     // Log the list of Pokémon
                     for (pokemon in pokemonList) {
-                        Log.d("HomeViewModel", "Pokemon Name: ${pokemon.name}")
+                        Log.d("HomeViewModel", "Pokemon Name: ${pokemon}")
                     }
 
                 } else {
-                    // Handle the error here
+                    //TODO: Handle the error here
                 }
             } catch (e: Exception) {
-                // Handle the exception here
+                //TODO: Handle the exception here
+            }
+        }
+    }
+
+    private fun getPokemonOwnedFromDB()
+    {
+        viewModelScope.launch(Dispatchers.IO) {
+            var result = db.kodexDao().getAll()
+            withContext(Dispatchers.Main) {
+                _pokemons.value = result
             }
         }
     }
