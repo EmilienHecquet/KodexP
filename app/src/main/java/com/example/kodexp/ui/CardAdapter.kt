@@ -1,23 +1,31 @@
 package com.example.kodexp.ui
 
+import android.net.Uri
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.example.kodexp.R
-import com.example.kodexp.room.kodex.Kodex
+import com.example.kodexp.model.Pokemon
 
 
-class CardAdapter(val cardItemList: List<Kodex>?): RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
+class CardAdapter(val cardItemList: List<Pokemon>): RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
 
     class CardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        var textViewTitle: TextView
-        var textViewDescription: TextView
+        var pokemonTextTitle: TextView
+        var pokemonEntryNumber: TextView
+        var pokemonUriImage : ImageView
+        var ownedImage : ImageView
 
         init {
-            textViewTitle = view.findViewById<TextView>(R.id.textViewTitle)
-            textViewDescription = view.findViewById<TextView>(R.id.textViewDescription)
+            pokemonTextTitle = view.findViewById<TextView>(R.id.pokemonTextTitle)
+            pokemonEntryNumber = view.findViewById<TextView>(R.id.pokemonEntryNumber)
+            pokemonUriImage = view.findViewById<ImageView>(R.id.pokemonUriImage)
+            ownedImage = view.findViewById<ImageView>(R.id.ownedImage)
         }
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
@@ -27,12 +35,14 @@ class CardAdapter(val cardItemList: List<Kodex>?): RecyclerView.Adapter<CardAdap
     }
 
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
-        val currentItem: Kodex = cardItemList!![position]
-        holder.textViewTitle.setText(currentItem.pokemon_id.toString())
-        holder.textViewDescription.setText(currentItem.owned.toString())
+        val currentItem: Pokemon = cardItemList[position]
+        holder.pokemonTextTitle.setText(currentItem.name)
+        holder.pokemonEntryNumber.setText(currentItem.id.toString())
+        holder.pokemonUriImage.load("https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/132.png")
+        if (!currentItem.owned) holder.ownedImage.visibility = View.GONE
     }
 
     override fun getItemCount(): Int {
-        return cardItemList!!.size
+        return cardItemList.size
     }
 }

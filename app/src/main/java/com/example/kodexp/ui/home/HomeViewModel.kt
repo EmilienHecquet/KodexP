@@ -12,19 +12,28 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.kodexp.room.kodex.Kodex
-import com.example.kodexp.room.kodex.KodexDao
 import com.example.kodexp.room.kodex.KodexDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import com.example.kodexp.model.Pokemon
+import com.example.kodexp.api.PokeApiService
 import kotlinx.coroutines.withContext
-import javax.security.auth.callback.Callback
 
 class HomeViewModel(context: Context) : ViewModel() {
 
     val db: KodexDatabase
+    private val _pokemonList = MutableLiveData<List<Pokemon>>()
+    val pokemonList: LiveData<List<Pokemon>> get() = _pokemonList
+
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("https://pokeapi.co/api/v2/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    private val service = retrofit.create(PokeApiService::class.java)
     private val _pokemons = MutableLiveData<List<Kodex>>()
     val pokemons: LiveData<List<Kodex>> = _pokemons
 
@@ -53,20 +62,42 @@ class HomeViewModel(context: Context) : ViewModel() {
             KodexDatabase::class.java, "kodex-database"
         ).build()
 
-        viewModelScope.launch(Dispatchers.IO) {
-            //TODO : appel api
-            //todo: traitement
+        // Use local data to get owned pokemons
+        getPokemonOwnedFromDB()
 
-            var result = db.kodexDao().getAll()
-            withContext(Dispatchers.Main) {
-                Log.d("TAG", "init: $result")
-                _pokemons.value = result
+        // Get pokemon from API (use local data update object pojemon with owned)
+        fetchPokemonData()
+    }
+
+    private fun fetchPokemonData() {
+        viewModelScope.launch {
+            try {
+                val response = service.getPokemonList()
+                if (response.isSuccessful) {
+                    val pokemonListResponse = response.body()
+                    val pokemonList = pokemonListResponse?.results?.mapIndexed { index, pokemonListItem ->
+                        _pokemons.value!!.find{ it.pokemon_id == index }?.let {
+                            Pokemon(index, pokemonListItem.name, pokemonListItem.url, it.owned)
+                        } ?: Pokemon(index, pokemonListItem.name, pokemonListItem.url)
+                    } ?: emptyList()
+
+                    _pokemonList.value = pokemonList
+                } else {
+                    //TODO: Handle the error here
+                }
+            } catch (e: Exception) {
+                //TODO: Handle the exception here
             }
         }
     }
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is home Fragment"
+    private fun getPokemonOwnedFromDB()
+    {
+        viewModelScope.launch(Dispatchers.IO) {
+            var result = db.kodexDao().getAll()
+            withContext(Dispatchers.Main) {
+                _pokemons.value = result
+            }
+        }
     }
-    val text: LiveData<String> = _text
 }
