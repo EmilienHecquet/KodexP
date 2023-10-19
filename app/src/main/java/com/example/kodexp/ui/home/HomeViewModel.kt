@@ -81,12 +81,6 @@ class HomeViewModel(context: Context) : ViewModel() {
                     } ?: emptyList()
 
                     _pokemonList.value = pokemonList
-
-                    // Log the list of Pokémon
-                    for (pokemon in pokemonList) {
-                        Log.d("HomeViewModel", "Pokemon Name: ${pokemon}")
-                    }
-
                 } else {
                     //TODO: Handle the error here
                 }
