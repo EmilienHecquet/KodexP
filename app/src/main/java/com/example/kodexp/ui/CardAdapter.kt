@@ -37,7 +37,7 @@ class CardAdapter(var cardItemList: List<Pokemon> = emptyList()): RecyclerView.A
         val currentItem: Pokemon = cardItemList[position]
         holder.pokemonTextTitle.setText(currentItem.name)
         holder.pokemonEntryNumber.setText(currentItem.id.toString())
-        holder.pokemonUriImage.load("https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${currentItem.id}.png"){
+        holder.pokemonUriImage.load(currentItem.imageUri){
             transformations(CircleCropTransformation())
         }
         if (!currentItem.owned) holder.ownedImage.visibility = View.GONE
