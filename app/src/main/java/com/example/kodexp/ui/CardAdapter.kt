@@ -38,7 +38,7 @@ class CardAdapter(val cardItemList: List<Pokemon>): RecyclerView.Adapter<CardAda
         val currentItem: Pokemon = cardItemList[position]
         holder.pokemonTextTitle.setText(currentItem.name)
         holder.pokemonEntryNumber.setText(currentItem.id.toString())
-        holder.pokemonUriImage.load("https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/132.png")
+        holder.pokemonUriImage.load("https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${currentItem.id}.png")
         if (!currentItem.owned) holder.ownedImage.visibility = View.GONE
     }
 

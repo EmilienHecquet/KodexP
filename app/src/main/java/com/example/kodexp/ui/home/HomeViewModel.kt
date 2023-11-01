@@ -72,13 +72,13 @@ class HomeViewModel(context: Context) : ViewModel() {
     private fun fetchPokemonData() {
         viewModelScope.launch {
             try {
-                val response = service.getPokemonList()
+                val response = service.getPokemonList(offset = 0, limit = 151)
                 if (response.isSuccessful) {
                     val pokemonListResponse = response.body()
                     val pokemonList = pokemonListResponse?.results?.mapIndexed { index, pokemonListItem ->
                         _pokemons.value!!.find{ it.pokemon_id == index }?.let {
-                            Pokemon(index, pokemonListItem.name, pokemonListItem.url, it.owned)
-                        } ?: Pokemon(index, pokemonListItem.name, pokemonListItem.url)
+                            Pokemon( pokemonListItem.name, pokemonListItem.url, it.owned)
+                        } ?: Pokemon( pokemonListItem.name, pokemonListItem.url)
                     } ?: emptyList()
 
                     _pokemonList.value = pokemonList
