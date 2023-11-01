@@ -1,7 +1,5 @@
 package com.example.kodexp.ui
 
-import android.net.Uri
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,11 +7,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.transform.CircleCropTransformation
 import com.example.kodexp.R
 import com.example.kodexp.model.Pokemon
 
 
-class CardAdapter(val cardItemList: List<Pokemon>): RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
+class CardAdapter(var cardItemList: List<Pokemon> = emptyList()): RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
 
     class CardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var pokemonTextTitle: TextView
@@ -38,11 +37,19 @@ class CardAdapter(val cardItemList: List<Pokemon>): RecyclerView.Adapter<CardAda
         val currentItem: Pokemon = cardItemList[position]
         holder.pokemonTextTitle.setText(currentItem.name)
         holder.pokemonEntryNumber.setText(currentItem.id.toString())
-        holder.pokemonUriImage.load("https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${currentItem.id}.png")
+        holder.pokemonUriImage.load("https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${currentItem.id}.png"){
+            transformations(CircleCropTransformation())
+        }
         if (!currentItem.owned) holder.ownedImage.visibility = View.GONE
     }
 
     override fun getItemCount(): Int {
         return cardItemList.size
+    }
+
+    fun updateList(newList: List<Pokemon>) {
+        val previous_size = cardItemList.size
+        cardItemList = newList
+        notifyItemRangeInserted(previous_size, cardItemList.size)
     }
 }

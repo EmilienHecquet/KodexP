@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.kodexp.databinding.FragmentHomeBinding
 import com.example.kodexp.ui.CardAdapter
 import kotlinx.coroutines.launch
+import okhttp3.internal.notifyAll
 
 class HomeFragment : Fragment() {
 
@@ -24,9 +25,6 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewLifecycleOwner.lifecycleScope.launch {
-
-        }
     }
 
     override fun onCreateView(
@@ -39,10 +37,24 @@ class HomeFragment : Fragment() {
         val root: View = binding.root
 
         val listView: RecyclerView = binding.listPokemon
+        listView.adapter = CardAdapter(viewModel.pokemonList.value ?: emptyList())
+
 
         viewModel.pokemonList.observe(viewLifecycleOwner) {
-            listView.adapter = CardAdapter(it)
+            (listView.adapter as CardAdapter).updateList(it)
         }
+
+        listView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                // If scroll at the end of the list populate the list with new pokemons
+                if (!recyclerView.canScrollVertically(1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    lifecycleScope.launch {
+                        viewModel.populatePokemonList()
+                    }
+                }
+            }
+        })
 
         return root
     }

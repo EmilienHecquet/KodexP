@@ -1,9 +1,7 @@
 package com.example.kodexp.ui.home
 
 import android.app.Application
-import android.content.ContentValues
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,6 +19,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import com.example.kodexp.model.Pokemon
 import com.example.kodexp.api.PokeApiService
 import kotlinx.coroutines.withContext
+import com.example.kodexp.utils.urlToId
 
 class HomeViewModel(context: Context) : ViewModel() {
 
@@ -69,19 +68,20 @@ class HomeViewModel(context: Context) : ViewModel() {
         fetchPokemonData()
     }
 
-    private fun fetchPokemonData() {
+    private fun fetchPokemonData(offset: Int = 0, limit: Int = 151) {
         viewModelScope.launch {
             try {
-                val response = service.getPokemonList(offset = 0, limit = 151)
+                val response = service.getPokemonList(offset, limit)
                 if (response.isSuccessful) {
                     val pokemonListResponse = response.body()
                     val pokemonList = pokemonListResponse?.results?.mapIndexed { index, pokemonListItem ->
-                        _pokemons.value!!.find{ it.pokemon_id == index }?.let {
+                        _pokemons.value!!.find{ it.pokemon_id == urlToId(pokemonListItem.url) }?.let {
                             Pokemon( pokemonListItem.name, pokemonListItem.url, it.owned)
                         } ?: Pokemon( pokemonListItem.name, pokemonListItem.url)
                     } ?: emptyList()
 
-                    _pokemonList.value = pokemonList
+                    // Concat new pokemonList to existing one
+                    _pokemonList.value = _pokemonList.value?.plus(pokemonList) ?: pokemonList
                 } else {
                     //TODO: Handle the error here
                 }
@@ -89,6 +89,16 @@ class HomeViewModel(context: Context) : ViewModel() {
                 //TODO: Handle the exception here
             }
         }
+    }
+
+    fun populatePokemonList() {
+        viewModelScope.launch {
+            try {
+                _pokemonList.value?.let { fetchPokemonData(it.size, 151) }
+            } catch (e: Exception) {
+                //TODO: Handle the exception here
+            }
+    }
     }
 
     private fun getPokemonOwnedFromDB()
