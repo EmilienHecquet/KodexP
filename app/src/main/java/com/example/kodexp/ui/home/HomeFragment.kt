@@ -56,6 +56,9 @@ class HomeFragment : Fragment() {
             }
         })
 
+        viewModel.pokemonList.observe(viewLifecycleOwner) {
+            (listView.adapter as CardAdapter).updateList(it)
+        }
         return root
     }
 

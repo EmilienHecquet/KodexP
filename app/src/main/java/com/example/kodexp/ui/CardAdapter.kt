@@ -48,8 +48,7 @@ class CardAdapter(var cardItemList: List<Pokemon> = emptyList()): RecyclerView.A
     }
 
     fun updateList(newList: List<Pokemon>) {
-        val previous_size = cardItemList.size
         cardItemList = newList
-        notifyItemRangeInserted(previous_size, cardItemList.size)
+        notifyDataSetChanged()
     }
 }
