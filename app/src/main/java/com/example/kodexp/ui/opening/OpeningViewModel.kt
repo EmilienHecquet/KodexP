@@ -25,7 +25,7 @@ interface PokeApiService {
 }
 
 class OpeningViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
-    fun <T : ViewModel?> create(modelClass: Class<T>): T {
+     fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(OpeningViewModel::class.java)) {
             return OpeningViewModel(context) as T
         }
@@ -34,8 +34,6 @@ class OpeningViewModelFactory(private val context: Context) : ViewModelProvider.
 }
 
 class OpeningViewModel(private val context: Context) : ViewModel() {
-    private val _isImageVisible = MutableLiveData(false)
-    val isImageVisible: LiveData<Boolean> = _isImageVisible
 
     private val _pokemonImage = MutableLiveData<String>()
     val pokemonImage: LiveData<String> = _pokemonImage
@@ -58,7 +56,6 @@ class OpeningViewModel(private val context: Context) : ViewModel() {
                     if (pokemon != null) {
                         // Display the Pokémon's sprite
                         _pokemonImage.value = pokemon.imageUri
-                        _isImageVisible.value = true
 
                         // Add the Pokémon's ID to your database using Room Database
                         val database = KodexDatabase.getInstance(context)
