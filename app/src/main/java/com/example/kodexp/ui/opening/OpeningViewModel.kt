@@ -1,8 +1,10 @@
 package com.example.kodexp.ui.opening
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.kodexp.model.Pokemon
 import com.example.kodexp.room.kodex.Kodex
@@ -22,7 +24,16 @@ interface PokeApiService {
     fun getPokemon(@Path("pokemonId") pokemonId: Int): Call<Pokemon>
 }
 
-class OpeningViewModel : ViewModel() {
+class OpeningViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+    fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(OpeningViewModel::class.java)) {
+            return OpeningViewModel(context) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+class OpeningViewModel(private val context: Context) : ViewModel() {
     private val _isImageVisible = MutableLiveData(false)
     val isImageVisible: LiveData<Boolean> = _isImageVisible
 
@@ -45,12 +56,12 @@ class OpeningViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     val pokemon = response.body()
                     if (pokemon != null) {
-                        // Affichez le sprite du Pokémon
+                        // Display the Pokémon's sprite
                         _pokemonImage.value = pokemon.imageUri
                         _isImageVisible.value = true
 
-                        // Ajoutez l'ID du Pokémon dans votre base de données en utilisant Room Database
-                        val database = KodexDatabase.getInstance()
+                        // Add the Pokémon's ID to your database using Room Database
+                        val database = KodexDatabase.getInstance(context)
                         val kodexDao = database.kodexDao()
                         val pokemonId = pokemon.id
                         viewModelScope.launch(Dispatchers.IO) {
@@ -61,7 +72,7 @@ class OpeningViewModel : ViewModel() {
             }
 
             override fun onFailure(call: Call<Pokemon>, t: Throwable) {
-                // Gérez les erreurs ici
+                // Handle errors here
             }
         })
     }

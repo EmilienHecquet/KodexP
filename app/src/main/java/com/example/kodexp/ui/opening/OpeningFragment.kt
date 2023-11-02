@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.kodexp.databinding.FragmentDashboardBinding
+import com.example.kodexp.ui.opening.OpeningViewModel
 
 class OpeningFragment : Fragment() {
 
@@ -18,7 +19,8 @@ class OpeningFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentDashboardBinding.inflate(inflater, container, false)
-        viewModel = ViewModelProvider(this).get(OpeningViewModel::class.java)
+        viewModel = ViewModelProvider(this, OpeningViewModelFactory(requireContext()))
+            .get(OpeningViewModel::class.java)
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
